@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>后台</title>
+    <script src="/static/vue.min.js"></script>
+    <link rel="stylesheet" href="/static/iview.css">
+    <script src="/static/iview.min.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+	<link rel="shortcut icon" href="/static/icon.png">
+</head>
+<body>
+    <p>后台</p>
+    {{range $index,$ele := .filelist}}
+    <a href="backtable/{{$ele}}?password={{$.password}}">{{$ele}}</a>
+    <br/>
+    {{end}}
+</body>
+</html>

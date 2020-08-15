@@ -14,17 +14,63 @@ import (
 )
 
 func main() {
+	//下面是初始化部分
+	if !isFileOrDirectoryExists(path.Join(".", "users")) {
+		os.Mkdir(path.Join(".", "users"), 664)
+	}
+	if !isFileOrDirectoryExists(path.Join(".", "received")) {
+		os.Mkdir(path.Join(".", "received"), 664)
+	}
 	var conf config
 	json.Unmarshal([]byte(readStringFromFile("config.json")), &conf)
+	//下面是路由配置
 	router := gin.Default()
-	router.POST("/submit", receiveData)
-	//router.StaticFile("/", "./static/index.html")
+	router.POST("/u/:usernameshort/submit", receiveData)
+	router.GET("/u/:usernameshort/backtable", backtable)
+	router.GET("/u/:usernameshort/backtable/:filename", backtablefile)
 	router.GET("/u/:usernameshort", userIndexPage)
 	router.GET("/u/:usernameshort/personal-page", pp)
-	//router.StaticFS("/blackdoor", http.Dir("./received"))
 	router.LoadHTMLGlob("./template/*")
 	router.Static("/static", "./static")
 	router.Run(":" + strconv.Itoa(conf.Port))
+}
+
+func backtable(context *gin.Context) {
+	usernameShort := context.Param("usernameshort")
+	userPassword := context.Query("password")
+	userFilePath := path.Join(".", "users", usernameShort+".json")
+	if isFileOrDirectoryExists(userFilePath) {
+		var userInfo userInfo
+		json.Unmarshal([]byte(readStringFromFile(userFilePath)), &userInfo)
+		if userPassword == userInfo.Password {
+			var filenames []string
+			filesReceived, _ := ioutil.ReadDir(path.Join(".", "received", usernameShort))
+			for _, f := range filesReceived {
+				if !f.IsDir() {
+					filenames = append(filenames, f.Name())
+				}
+			}
+			context.HTML(200, "filelist.html", gin.H{"filelist": filenames, "password": userPassword})
+			return
+		}
+	}
+	context.JSON(404, gin.H{})
+}
+
+func backtablefile(context *gin.Context) {
+	usernameShort := context.Param("usernameshort")
+	userPassword := context.Query("password")
+	filename := context.Param("filename")
+	userFilePath := path.Join(".", "users", usernameShort+".json")
+	if isFileOrDirectoryExists(userFilePath) {
+		var userInfo userInfo
+		json.Unmarshal([]byte(readStringFromFile(userFilePath)), &userInfo)
+		if userPassword == userInfo.Password {
+			context.String(200, readStringFromFile(path.Join(".", "received", usernameShort, filename)))
+			return
+		}
+	}
+	context.JSON(404, gin.H{})
 }
 
 func userIndexPage(context *gin.Context) {
@@ -53,7 +99,11 @@ func receiveData(context *gin.Context) {
 	contact := context.PostForm("contact")
 	more := context.PostForm("more")
 	index := 0
-	for isFileOrDirectoryExists(path.Join(".", "received", name+"_"+strconv.Itoa(index)+".txt")) {
+	usernameShort := context.Param("usernameshort")
+	if !isFileOrDirectoryExists(path.Join(".", "received", usernameShort)) {
+		os.Mkdir(path.Join(".", "received", usernameShort), 664)
+	}
+	for isFileOrDirectoryExists(path.Join(".", "received", usernameShort, name+"_"+strconv.Itoa(index)+".txt")) {
 		index++
 	}
 	str := ""
@@ -68,7 +118,7 @@ func receiveData(context *gin.Context) {
 	str += contact + "\n"
 	str += "留言：\n"
 	str += more
-	writeStringToFile(path.Join(".", "received", name+"_"+strconv.Itoa(index)+".txt"), str)
+	writeStringToFile(path.Join(".", "received", usernameShort, name+"_"+strconv.Itoa(index)+".txt"), str)
 	context.JSON(200, gin.H{"code": 200, "msg": "succeed", "name": name})
 }
 
