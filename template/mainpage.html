@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>毕业留言箱</title>
+    <script src="/static/vue.min.js"></script>
+    <link rel="stylesheet" href="/static/iview.css">
+    <script src="/static/iview.min.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+	<link rel="shortcut icon" href="/static/icon.png">
+</head>
+<body>
+    <div id="App" style="padding: 2%;">
+        <h1 style="text-align: center;">毕业留言箱</h1>
+        <Row type="flex" justify="center" style="padding: 2%;">
+            <i-col :xs="20" :sm="16" :md="12" :lg="8">
+                <p>
+                    毕业了，你可以创建你的留言箱让同学给你留言。在下面填写你的姓名缩写、姓名以及密码来注册，或者填写姓名缩写和密码来登录后台。
+                </p>
+                <p style="background-color: #ff9900;color: white;">
+                    警告：本站密码全部采用明文存储，请不要将常用密码作为本站密码，否则后果自负
+                </p>
+            </i-col>
+        </Row>
+        <Row type="flex" justify="center" style="padding: 2%;">
+            <i-col :xs="20" :sm="16" :md="12" :lg="8">
+                <p>姓名缩写（英文字母）</p>
+                <i-input :value.sync="username" placeholder="请输入你的姓名缩写"></i-input>
+            </i-col>
+        </Row>
+        <Row type="flex" justify="center" style="padding: 2%;">
+            <i-col :xs="20" :sm="16" :md="12" :lg="8">
+                <p>姓名（中文）</p>
+                <p>登录后台的话不需要填这个</p>
+                <i-input :value.sync="fullname" placeholder="请输入你的姓名，如果你要登录后台的话不需要填写这个框"></i-input>
+            </i-col>
+        </Row>
+        <Row type="flex" justify="center" style="padding: 2%;">
+            <i-col :xs="20" :sm="16" :md="12" :lg="8">
+                <p>密码</p>
+                <i-input :value.sync="password" placeholder="请输入你的密码"></i-input>
+            </i-col>
+        </Row>
+        <Row type="flex" justify="center">
+            <i-col :xs="20" :sm="16" :md="12" :lg="8">
+                <i-button type="primary" long v-on:click="login">登录</i-button>
+            </i-col>
+        </Row>
+        <Row type="flex" justify="center" style="padding-top: 20px;">
+            <i-col :xs="20" :sm="16" :md="12" :lg="8">
+                <i-button type="primary" long v-on:click="register">注册并登录</i-button>
+            </i-col>
+        </Row>
+    </div>
+    <script>
+        var vm = new Vue({
+            el: "#App",
+            data: function(){
+                return{
+                    username:'',
+                    fullname:'',
+                    password:''
+                }
+            },
+            methods:{
+                register:function(event){
+                    let formData = new FormData()
+                    formData.append('username',this.username)
+                    formData.append('fullname',this.fullname)
+                    formData.append('password',this.password)
+                    axios.post("/register",formData).then(function(response){alert("注册成功");window.location='/u/' + vm.username + '/backtable?password=' + vm.password
+                    }).catch(function(err){alert("注册失败")
+                    })
+                },
+                login:function(event){
+                    window.location='/u/' + vm.username + '/backtable?password=' + vm.password
+                }
+            }
+        })
+    </script>
+</body>
+</html>

@@ -30,9 +30,31 @@ func main() {
 	router.GET("/u/:usernameshort/backtable/:filename", backtablefile)
 	router.GET("/u/:usernameshort", userIndexPage)
 	router.GET("/u/:usernameshort/personal-page", pp)
+	router.POST("/register", register)
+	router.StaticFile("/", "./template/mainpage.html")
 	router.LoadHTMLGlob("./template/*")
 	router.Static("/static", "./static")
 	router.Run(":" + strconv.Itoa(conf.Port))
+}
+
+func register(context *gin.Context) {
+	username := context.PostForm("username")
+	fullname := context.PostForm("fullname")
+	password := context.PostForm("password")
+	if username == "" || fullname == "" || password == "" {
+		context.JSON(400, gin.H{"code": 400, "msg": "有空字段"})
+	}
+	userFilePath := path.Join(".", "users", username+".json")
+	if isFileOrDirectoryExists(userFilePath) {
+		context.JSON(400, gin.H{"code": 400, "msg": "用户已存在"})
+		return
+	}
+	var userInfo userInfo
+	userInfo.Fullname = fullname
+	userInfo.Password = password
+	b, _ := json.Marshal(userInfo)
+	writeStringToFile(userFilePath, string(b))
+	context.JSON(200, gin.H{"code": 200, "msg": "注册成功"})
 }
 
 func backtable(context *gin.Context) {
@@ -50,11 +72,11 @@ func backtable(context *gin.Context) {
 					filenames = append(filenames, f.Name())
 				}
 			}
-			context.HTML(200, "filelist.html", gin.H{"filelist": filenames, "password": userPassword})
+			context.HTML(200, "filelist.html", gin.H{"filelist": filenames, "password": userPassword, "shortname": usernameShort})
 			return
 		}
 	}
-	context.JSON(404, gin.H{})
+	context.JSON(400, gin.H{})
 }
 
 func backtablefile(context *gin.Context) {
@@ -70,7 +92,7 @@ func backtablefile(context *gin.Context) {
 			return
 		}
 	}
-	context.JSON(404, gin.H{})
+	context.JSON(400, gin.H{})
 }
 
 func userIndexPage(context *gin.Context) {
@@ -82,7 +104,7 @@ func userIndexPage(context *gin.Context) {
 		context.HTML(http.StatusOK, "index.html", gin.H{"fullname": userInfo.Fullname, "shortname": usernameShort, "vuereplacement": "{{name}}"})
 		return
 	}
-	context.JSON(404, gin.H{})
+	context.JSON(400, gin.H{})
 }
 
 func pp(context *gin.Context) {
