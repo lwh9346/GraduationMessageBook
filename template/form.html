@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.name}}的专属页面</title>
+    <script src="/static/vue.min.js"></script>
+    <link rel="stylesheet" href="/static/iview.css">
+    <script src="/static/iview.min.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+	<link rel="shortcut icon" href="/static/icon.png">
+</head>
+<body>
+    <div id="App" style="padding: 2%;">
+        <h1 style="text-align: center;">{{.name}}的专属留言册页面</h1>
+        <Row type="flex" justify="center" style="padding: 2%;">
+            <i-col :xs="20" :sm="16" :md="12" :lg="8">
+                <p>
+                    {{.name}}你好，为了在毕业之后不与你失去联系，我想了解一下你的去向和联系方式。如果可以的话，我希望你可以在下方填上这些信息如果信息有所更改，你可以再次用相同的方式访问这个页面，再提交一次信息。谢谢你啦！（不想填的信息直接放空即可）
+                </p>
+            </i-col>
+        </Row>
+        <Row type="flex" justify="center" style="padding: 2%;">
+            <i-col :xs="20" :sm="16" :md="12" :lg="8">
+                <p>你所前往的大学</p>
+                <i-input :value.sync="university" placeholder="请输入大学名称..."></i-input>
+            </i-col>
+        </Row>
+        <Row type="flex" justify="center" style="padding: 2%;">
+            <i-col :xs="20" :sm="16" :md="12" :lg="8">
+                <p>你所就读的院系及专业</p>
+                <i-input :value.sync="major" placeholder="请输入院系及专业名称..."></i-input>
+            </i-col>
+        </Row>
+        <Row type="flex" justify="center" style="padding: 2%;">
+            <i-col :xs="20" :sm="16" :md="12" :lg="8">
+                <p>你所前往的城市</p>
+                <i-input :value.sync="city" placeholder="请输入城市名称..."></i-input>
+            </i-col>
+        </Row>
+        <Row type="flex" justify="center" style="padding: 2%;">
+            <i-col :xs="20" :sm="16" :md="12" :lg="8">
+                <p>你更换了联系方式吗？</p>
+                <i-input :value.sync="contact" placeholder="你的新联系方式..." type="textarea" :rows="3"></i-input>
+            </i-col>
+        </Row>
+        <Row type="flex" justify="center" style="padding: 2%;">
+            <i-col :xs="20" :sm="16" :md="12" :lg="8">
+                <p>还有什么想和我说吗？</p>
+                <i-input :value.sync="more" placeholder="这个就是留言部分了" type="textarea" :rows="8"></i-input>
+            </i-col>
+        </Row>
+        <Row type="flex" justify="center">
+            <i-col :xs="20" :sm="16" :md="12" :lg="8">
+                <i-button type="primary" long v-on:click="submit">提交</i-button>
+            </i-col>
+        </Row>
+    </div>
+    <script>
+        var vm = new Vue({
+            el: "#App",
+            data: function(){
+                return{
+                    name:"{{.name}}",
+                    university:'',
+                    major:'',
+                    city:'',
+                    contact:'',
+                    more:''
+                }
+            },
+            methods:{
+                submit:function(event){
+                    let formData = new FormData()
+                    formData.append('name',this.name)
+                    formData.append('university',this.university)
+                    formData.append('major',this.major)
+                    formData.append('city',this.city)
+                    formData.append('contact',this.contact)
+                    formData.append('more',this.more)
+                    axios.post("/submit",formData).then(function(response){alert('提交成功')
+                    }).catch(function(err){alert('提交失败')
+                    })
+                }
+            }
+        })
+    </script>
+</body>
+</html>

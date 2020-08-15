@@ -2,3 +2,11 @@
 !LICENSE
 !README.md
 !.gitignore
+!go.mod
+!go.sum
+!main.go
+!static
+!static/*
+!template
+!template/*
+!received

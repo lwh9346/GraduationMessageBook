@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>抓哥的毕业留言册/通讯录</title>
+    <script src="/static/vue.min.js"></script>
+    <link rel="stylesheet" href="/static/iview.css">
+    <script src="/static/iview.min.js"></script>
+	<link rel="shortcut icon" href="/static/icon.png">
+</head>
+<body>
+    <div id="App" style="padding: 2%;">
+        <h1 style="text-align: center;">抓哥的毕业留言册/通讯录</h1>
+        <Row type="flex" justify="center" style="padding: 2%;">
+            <i-col :xs="20" :sm="16" :md="12" :lg="8">
+                <p style="text-align: center;">请把张三改成你的名字</p>
+                <i-input :value.sync="name" placeholder="请输入你的姓名"></i-input>
+            </i-col>
+        </Row>
+        <Row type="flex" justify="center">
+            <i-col :xs="20" :sm="16" :md="12" :lg="8">
+                <i-button type="primary" long v-on:click="submit">这就前往{{name}}的专属留言册页面</i-button>
+            </i-col>
+        </Row>
+    </div>
+    <script>
+        var vm = new Vue({
+            el:'#App',
+            data: function(){
+                return{
+                    name:'张三'
+                }
+            },
+            methods:{
+                submit:function(event){
+                    window.location="/personal-page?name=" + this.name
+                }
+            }
+        })
+    </script>
+</body>
+</html>
