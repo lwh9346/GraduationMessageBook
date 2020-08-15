@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"path"
@@ -12,19 +14,35 @@ import (
 )
 
 func main() {
+	var conf config
+	json.Unmarshal([]byte(readStringFromFile("config.json")), &conf)
 	router := gin.Default()
-	router.GET("/personal-page", pp)
 	router.POST("/submit", receiveData)
-	router.StaticFile("/", "./static/index.html")
-	router.StaticFS("/blackdoor", http.Dir("./received"))
+	//router.StaticFile("/", "./static/index.html")
+	router.GET("/u/:usernameshort", userIndexPage)
+	router.GET("/u/:usernameshort/personal-page", pp)
+	//router.StaticFS("/blackdoor", http.Dir("./received"))
 	router.LoadHTMLGlob("./template/*")
 	router.Static("/static", "./static")
-	router.Run(":8080")
+	router.Run(":" + strconv.Itoa(conf.Port))
+}
+
+func userIndexPage(context *gin.Context) {
+	usernameShort := context.Param("usernameshort")
+	userFilePath := path.Join(".", "users", usernameShort+".json")
+	if isFileOrDirectoryExists(userFilePath) {
+		var userInfo userInfo
+		json.Unmarshal([]byte(readStringFromFile(userFilePath)), &userInfo)
+		context.HTML(http.StatusOK, "index.html", gin.H{"fullname": userInfo.Fullname, "shortname": usernameShort, "vuereplacement": "{{name}}"})
+		return
+	}
+	context.JSON(404, gin.H{})
 }
 
 func pp(context *gin.Context) {
+	usernameShort := context.Param("usernameshort")
 	name := context.Query("name")
-	context.HTML(http.StatusOK, "form.html", gin.H{"name": strings.ReplaceAll(name, "\"", "\\\"")})
+	context.HTML(http.StatusOK, "form.html", gin.H{"name": strings.ReplaceAll(name, "\"", "\\\""), "usernameshort": usernameShort})
 }
 
 func receiveData(context *gin.Context) {
@@ -77,4 +95,21 @@ func writeStringToFile(file, s string) error {
 	}
 	io.WriteString(f, s)
 	return nil
+}
+
+func readStringFromFile(inFile string) string {
+	b, err := ioutil.ReadFile(inFile)
+	if err != nil {
+		return ""
+	}
+	return string(b)
+}
+
+type config struct {
+	Port int
+}
+
+type userInfo struct {
+	Fullname string
+	Password string
 }

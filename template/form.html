@@ -78,7 +78,7 @@
                     formData.append('city',this.city)
                     formData.append('contact',this.contact)
                     formData.append('more',this.more)
-                    axios.post("/submit",formData).then(function(response){alert('提交成功')
+                    axios.post("/u/{{.usernameshort}}/submit",formData).then(function(response){alert('提交成功')
                     }).catch(function(err){alert('提交失败')
                     })
                 }
