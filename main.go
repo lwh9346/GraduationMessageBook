@@ -43,6 +43,7 @@ func register(context *gin.Context) {
 	password := context.PostForm("password")
 	if username == "" || fullname == "" || password == "" {
 		context.JSON(400, gin.H{"code": 400, "msg": "有空字段"})
+		return
 	}
 	userFilePath := path.Join(".", "users", username+".json")
 	if isFileOrDirectoryExists(userFilePath) {
